@@ -1,0 +1,222 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+* {
+    font-family: 'Poppins', sans-serif !important;
+}
+
+
+/* ============================= */
+/*  PALETTE & THEME VARIABLES   */
+/* ============================= */
+:root {
+  --font-size: 16px;
+
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+
+  --primary: #22C55E;
+  --primary-foreground: oklch(1 0 0);
+
+  --secondary: oklch(0.95 0.0058 264.53);
+  --secondary-foreground: #030213;
+
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+
+  --accent: #e9ebef;
+  --accent-foreground: #030213;
+
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(0, 0, 0, 0.1);
+
+  --input: transparent;
+  --input-background: #f3f3f5;
+
+  --switch-background: #cbced4;
+
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+
+  --ring: oklch(0.708 0 0);
+
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  --radius: 0.625rem;
+
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: #030213;
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+/* ============================= */
+/*       DARK MODE OVERRIDE     */
+/* ============================= */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+}
+
+/* ============================= */
+/*       BASE STYLING           */
+/* ============================= */
+html {
+  font-size: var(--font-size);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* ============================= */
+/*        BUTTON CUSTOM         */
+/* ============================= */
+.btn-primary-custom {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: var(--radius);
+}
+
+.btn-primary-custom:hover {
+  opacity: 0.9;
+}
+
+.btn-outline-primary-custom {
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  background: transparent;
+  border-radius: var(--radius);
+}
+
+.btn-outline-primary-custom:hover {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+/* ============================= */
+/*        CARD & BOX            */
+/* ============================= */
+.card-custom {
+  background-color: var(--card);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* ============================= */
+/*        COLOR HELPERS         */
+/* ============================= */
+.bg-primary-custom {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.text-primary-custom {
+  color: var(--primary);
+}
+
+/* ============================= */
+/*        PROMO SLIDER          */
+/* ============================= */
+.promo-scroll {
+  scroll-behavior: smooth;
+  overflow-x: auto;
+  display: flex;
+  gap: 16px;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.promo-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.promo-card {
+  min-width: 280px;
+  height: 150px;
+  border-radius: 16px;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.promo-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ============================= */
+/*        DOT INDICATOR         */
+/* ============================= */
+.dot {
+  height: 10px;
+  width: 10px;
+  background: #ccc;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 4px;
+}
+
+.dot.active {
+  background: var(--primary);
+}
+
+/* ============================= */
+/*        SCROLLBAR HIDE        */
+/* ============================= */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
