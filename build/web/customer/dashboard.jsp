@@ -10,7 +10,7 @@
 <%
     User user = (User) session.getAttribute("user");
     if (user == null) {
-        response.sendRedirect("../login.jsp");
+        response.sendRedirect(request.getContextPath() + "/login.jsp");
         return;
     }
 
@@ -37,34 +37,13 @@
             }
 
             .promo-card {
-                min-width: 100%;
+                min-width: 30%;
                 max-width: 420px;
-                height: 180px;
+                height: 150px;
                 color: white;
                 border-radius: 16px;
                 padding: 24px;
                 flex-shrink: 0;
-            }
-
-            .product-card {
-                background: white;
-                border-radius: 14px;
-                padding: 10px;
-                box-shadow: 0 2px 8px rgba(0,0,0,.08);
-            }
-
-            .product-card img {
-                width: 100%;
-                height: 130px;
-                object-fit: cover;
-                border-radius: 10px;
-            }
-
-            .profile-img {
-                width: 64px;
-                height: 64px;
-                border-radius: 50%;
-                object-fit: cover;
             }
         </style>
     </head>
@@ -81,12 +60,12 @@
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
-                    <a href="../CartServlet" class="btn position-relative">
+                    <a href="<%= request.getContextPath() %>/CartServlet" class="btn position-relative">
                         <i class="bi bi-cart fs-4"></i>
                         <span style="position: absolute; top: 5px; transform: none" class="badge rounded-pill bg-danger pt-1">
                             ${sessionScope.cartCount == null ? 0 : sessionScope.cartCount}
                         </span>
-                    </a>
+                    </a> 
 
                     <a href="profile.jsp" class="btn">
                         <i class="bi bi-person fs-3"></i>
@@ -98,12 +77,12 @@
         <div class="container py-4">
 
             <!-- ================= USER INFO ================= -->
-            <div class="bg-white rounded shadow-sm p-4 mb-4 d-flex align-items-center gap-3">
+            <div style="border-radius: 10px;" class="bg-white shadow-sm p-3 mb-2 d-flex align-items-center gap-3">
                 <div class="avatar-circle">
                     <i class="bi bi-person"></i>
                 </div>
                 <div>
-                    <h5 class="mb-0">Halo, <%= user.getName() %> 👋</h5>
+                    <h6 class="mb-0">Halo, <%= user.getUsername() %> 👋</h6>
                     <small class="text-muted">📍 <%= user.getAddress() %></small>
                 </div>
             </div>
@@ -147,6 +126,8 @@
                            type="text"
                            name="keyword"
                            class="form-control border-start-0"
+                           value="<%= request.getAttribute("keyword") != null ? request.getAttribute("keyword") : "" %>"
+                           autocomplete="off"
                            placeholder="Cari produk...">
                 </div>
             </form>
@@ -154,55 +135,34 @@
             <!-- ================= PRODUK TERBARU ================= -->
             <div class="d-flex justify-content-between mb-3">
                 <h4>Produk Terbaru</h4>
-                <a href="allProduct.jsp" class="text-success fw-semibold">Lihat Semua
-                    <i class="bi bi-arrow-right ms-1"></i>
+                <a style="color: #16a34a" href="ProductServlet" class="fw-semibold  d-inline-flex align-items-center text-decoration-none">
+                    <span>Lihat Semua</span>
+                    <i style="color: #16a34a" class="bi bi-arrow-right-short ms-1 fs-3"></i>
                 </a>
             </div>
 
             <div class="row g-3">
-
                 <%
                     if (products != null && !products.isEmpty()) {
                         for (Product p : products) {
+                            request.setAttribute("product", p);
                 %>
-
-                <div class="col-md-3 col-6">
-                    <div class="product-card">
-                        <%
-                            String img = p.getImage();
-                            boolean isUrl = img != null && (img.startsWith("http://") || img.startsWith("https://"));
-                        %>
-
-                        <img src="<%= isUrl ? img : "../assets/img/" + img %>" 
-                             alt="<%= p.getName() %>" 
-                             class="img-fluid">
-
-
-                        <h6 class="mt-2 mb-1"><%= p.getName() %></h6>
-                        <p class="text-muted small mb-2">Rp <%= String.format("%,.0f", p.getPrice()) %></p>
-
-                        <a href="../CartServlet?add=<%= p.getProductId() %>"
-                           class="btn btn-success btn-sm w-100">
-                           + Keranjang
-                        </a>
+                    <div class="col-md-3 col-6">
+                        <jsp:include page="components/productCard.jsp" />
                     </div>
-                </div>
-
                 <%
                         }
                     } else {
                 %>
-
-                <div class="col-12 text-center py-5 bg-white rounded">
-                    <span class="text-muted">Produk tidak tersedia</span>
-                </div>
-
-                <% } %>
-
+                    <div class="col-12 text-center text-muted py-5">
+                        Produk tidak tersedia
+                    </div>
+                <%
+                    }
+                %>
             </div>
 
-        </div>
-                
+ 
         <!-- ================= AUTO SLIDER SCRIPT ================= -->
         <script>
             const promo = document.getElementById('promoScroll');
@@ -221,6 +181,31 @@
                     d.classList.toggle('active', i === index);
                 });
             }, 4000);
+        </script>
+        
+        <!-- ================= AJAX CART COUNT ================= -->    
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const buttons = document.querySelectorAll(".add-to-cart");
+                const cartBadge = document.querySelector(".btn.position-relative .badge");
+
+                buttons.forEach(btn => {
+                    btn.addEventListener("click", function(e) {
+                        e.preventDefault();
+                        const productId = this.getAttribute("data-product-id");
+
+                        fetch("<%= request.getContextPath() %>/CartServlet?add=" + productId, {
+                            headers: { "X-Requested-With": "XMLHttpRequest" }
+                        })
+
+                        .then(res => res.json())
+                        .then(data => {
+                            cartBadge.textContent = data.cartCount;
+                        })
+                        .catch(err => console.error(err));
+                    });
+                });
+            });
         </script>
 
     </body>

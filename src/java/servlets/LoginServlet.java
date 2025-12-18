@@ -32,7 +32,7 @@ public class LoginServlet extends HttpServlet {
 
             if (rs.next()) {
 
-                // ✅ BUAT OBJECT USER SESUAI CONSTRUCTOR
+                //  BUAT OBJECT USER SESUAI CONSTRUCTOR
                 User user = new User(
                     rs.getString("name"),
                     rs.getString("username"),
@@ -43,10 +43,10 @@ public class LoginServlet extends HttpServlet {
                     rs.getString("role")
                 );
 
-                // ✅ SET userId VIA SETTER
+                //  SET userId VIA SETTER
                 user.setUserId(rs.getInt("user_id"));
 
-                // ✅ SIMPAN KE SESSION
+                //  SIMPAN KE SESSION
                 HttpSession session = request.getSession();
                 session.setAttribute("user", user);
 

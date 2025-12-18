@@ -1,67 +1,59 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
- */
 package servlets;
 
 import classes.JDBC;
 import models.Product;
-import java.util.List;
-import java.util.ArrayList;
+import models.User;
+
+import java.io.IOException;
 import java.sql.Statement;
 import java.sql.ResultSet;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.List;
+import java.util.ArrayList;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
+import java.sql.*;
 
-/**
- *
- * @author ASUS
- */
 @WebServlet(name = "CustomerServlet", urlPatterns = {"/CustomerServlet"})
 public class CustomerServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+            throws ServletException, IOException {
 
         JDBC db = new JDBC();
         db.connect();
 
         List<Product> products = new ArrayList<>();
+        String keyword = request.getParameter("keyword");
+        String ajax = request.getParameter("ajax");
 
-        String keyword = request.getParameter("keyword");   // dari search
-        String all = request.getParameter("all");           // dari "lihat semua"
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        if(user == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+        int userId = user.getUserId();
 
+        int cartCount = 0;
         try {
             Statement st = db.getConnection().createStatement();
             ResultSet rs;
 
             if (keyword != null && !keyword.trim().isEmpty()) {
-                // === MODE SEARCH ===
-                String sql = "SELECT * FROM products WHERE name LIKE '%" + keyword + "%'";
+                String sql = "SELECT * FROM products " +
+                             "WHERE name LIKE '%" + keyword + "%' " +
+                             "ORDER BY product_id DESC";
                 rs = st.executeQuery(sql);
-
-            } else if (all != null) {
-                // === MODE LIHAT SEMUA PRODUK ===
-                String sql = "SELECT * FROM products";
-                rs = st.executeQuery(sql);
-
             } else {
-                // === MODE DASHBOARD (DEFAULT: 8 TERBARU) ===
-                String sql = "SELECT * FROM products ORDER BY product_id DESC LIMIT 8";
+                String sql = "SELECT * FROM products " +
+                             "ORDER BY product_id DESC " +
+                             "LIMIT 8";
                 rs = st.executeQuery(sql);
             }
 
@@ -70,7 +62,7 @@ public class CustomerServlet extends HttpServlet {
                     rs.getInt("product_id"),
                     rs.getString("name"),
                     rs.getString("description"),
-                    rs.getDouble("price"),
+                    rs.getInt("price"),
                     rs.getInt("stock"),
                     rs.getString("image"),
                     rs.getDouble("rating"),
@@ -79,20 +71,35 @@ public class CustomerServlet extends HttpServlet {
                 products.add(p);
             }
 
+            rs.close();
+            st.close();
+            
+            // ================== CART ==================
+            Connection con = db.getConnection();
+            PreparedStatement ps = con.prepareStatement(
+            "SELECT SUM(quantity) AS total FROM cart_items c JOIN carts ca ON c.cart_id=ca.cart_id WHERE ca.user_id=?");
+            ps.setInt(1, userId);
+            ResultSet rse = ps.executeQuery();
+            if (rse.next()) cartCount = rse.getInt("total");
+            session.setAttribute("cartCount", cartCount);
+            
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            db.disconnect();
         }
 
         request.setAttribute("products", products);
+        request.setAttribute("keyword", keyword);
 
-        // === ARAHKAN KE HALAMAN SESUAI MODE ===
-        if (keyword != null || all != null) {
-            request.getRequestDispatcher("customer/allProduct.jsp")
+        if ("1".equals(ajax)) {
+            // Kembalikan hanya HTML grid produk (partial JSP)
+            request.getRequestDispatcher("customer/partials/productList.jsp")
                    .forward(request, response);
         } else {
+            // Render seluruh halaman dashboard
             request.getRequestDispatcher("customer/dashboard.jsp")
                    .forward(request, response);
         }
     }
-
 }

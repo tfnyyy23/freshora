@@ -9,13 +9,13 @@ package models;
  * @author ASUS
  */
 public class Product {
-    private int productId;
+    private int productId, price;
     private String name, description, image;
-    private double price, rating;
+    private double rating;
     private int stock, categoryId;
 
     public Product() {}
-    public Product(int productId, String name, String description, double price,
+    public Product(int productId, String name, String description, int price,
                    int stock, String image, double rating, int categoryId) {
 
         this.productId = productId;
@@ -30,6 +30,8 @@ public class Product {
 
     public int getProductId() { return productId; }
     public String getName() { return name; }
-    public double getPrice() { return price; }
+    public int getPrice() { return price; }
     public String getImage() { return image; }
+     public int getStock() { return stock; }
+     public double getRating() { return rating; }
 }
