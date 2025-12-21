@@ -4,84 +4,70 @@
  */
 package servlets;
 
+import classes.JDBC;
+import models.User;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.sql.*;
+import java.util.*;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
-/**
- *
- * @author ASUS
- */
 @WebServlet(name = "OrderServlet", urlPatterns = {"/OrderServlet"})
 public class OrderServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet OrderServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet OrderServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
-    }
-
-    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
-    /**
-     * Handles the HTTP <code>GET</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+        
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
+        // Proteksi: Cek login
+        if (user == null) {
+            response.sendRedirect("login.jsp");
+            return;
+        }
+
+        List<Map<String, Object>> orders = new ArrayList<>();
+        JDBC db = new JDBC();
+        
+        try {
+            db.connect();
+            Connection con = db.getConnection();
+
+            // Query untuk mendapatkan data pesanan + Nama Customer
+            // Sesuaikan nama tabel 'orders' dan 'users' di DB kamu
+            String sql = "SELECT o.order_id, u.name as customer_name, o.total_price, o.status, o.order_date " +
+                         "FROM orders o " +
+                         "JOIN users u ON o.user_id = u.user_id " +
+                         "ORDER BY o.order_date DESC";
+
+            ResultSet rs = con.createStatement().executeQuery(sql);
+
+            while (rs.next()) {
+                Map<String, Object> order = new HashMap<>();
+                order.put("orderId", rs.getInt("order_id"));
+                order.put("customerName", rs.getString("customer_name"));
+                order.put("total", rs.getInt("total_price"));
+                order.put("status", rs.getString("status"));
+                order.put("date", rs.getTimestamp("order_date"));
+                orders.add(order);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            db.disconnect();
+        }
+
+        request.setAttribute("orderList", orders);
+        
+        // Cek Role: Admin ke halaman manajemen, Customer ke riwayat belanja (jika ada)
+        if ("admin".equals(user.getRole())) {
+            request.getRequestDispatcher("admin/orders.jsp").forward(request, response);
+        } else {
+            // Halaman riwayat pesanan untuk customer (opsional)
+            request.getRequestDispatcher("customer/myOrders.jsp").forward(request, response);
+        }
     }
-
-    /**
-     * Handles the HTTP <code>POST</code> method.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        processRequest(request, response);
-    }
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
-    @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
 }

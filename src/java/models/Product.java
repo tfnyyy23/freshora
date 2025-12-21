@@ -34,4 +34,6 @@ public class Product {
     public String getImage() { return image; }
      public int getStock() { return stock; }
      public double getRating() { return rating; }
+     public int getCategoryId() { return categoryId; }
+     
 }

@@ -21,22 +21,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- *
- * @author ASUS
- */
 @WebServlet(name = "ProductServlet", urlPatterns = {"/ProductServlet"})
 public class ProductServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -59,10 +46,12 @@ public class ProductServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
+        
         if(user == null) {
             response.sendRedirect("login.jsp");
             return;
         }
+        
         int userId = user.getUserId();
 
         int cartCount = 0;
@@ -91,17 +80,14 @@ public class ProductServlet extends HttpServlet {
                 "SELECT * FROM products WHERE 1=1"
             );
             
-            // FILTER KATEGORI
             if (!"0".equals(categoryParam)) {
                 sql.append(" AND category_id = ").append(categoryParam);
             }
 
-            // SEARCH NAMA PRODUK
             if (!keyword.isEmpty()) {
                 sql.append(" AND name LIKE '%").append(keyword).append("%'");
             }
 
-            // SORT
             switch (sort) {
                 case "price-low":
                     sql.append(" ORDER BY price ASC");
@@ -130,26 +116,35 @@ public class ProductServlet extends HttpServlet {
             }
             
             // ================== CART ==================
-            PreparedStatement ps = con.prepareStatement(
-            "SELECT SUM(quantity) AS total FROM cart_items c JOIN carts ca ON c.cart_id=ca.cart_id WHERE ca.user_id=?");
-            ps.setInt(1, userId);
-            ResultSet rse = ps.executeQuery();
-            if (rse.next()) cartCount = rse.getInt("total");
-            session.setAttribute("cartCount", cartCount);
-
-            } catch (SQLException e) {
-                throw new ServletException(e);
-            } finally {
-                db.disconnect();
+            // Hanya jalankan query cart jika user adalah customer
+            if (!"admin".equals(user.getRole())) {
+                PreparedStatement ps = con.prepareStatement(
+                "SELECT SUM(quantity) AS total FROM cart_items c JOIN carts ca ON c.cart_id=ca.cart_id WHERE ca.user_id=?");
+                ps.setInt(1, userId);
+                ResultSet rse = ps.executeQuery();
+                if (rse.next()) cartCount = rse.getInt("total");
+                session.setAttribute("cartCount", cartCount);
             }
 
-        // ================== SEND TO VIEW ==================
-        request.setAttribute("products", products);
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        } finally {
+            db.disconnect();
+        }
+
+        // ================== SEND TO VIEW BERDASARKAN ROLE ==================
         request.setAttribute("categories", categories);
         request.setAttribute("selectedCategory", categoryParam);
         request.setAttribute("sortBy", sort);
 
-        request.getRequestDispatcher("customer/allProduct.jsp")
-                .forward(request, response);
+        if (user != null && "admin".equals(user.getRole())) {
+            // Nama attribute disesuaikan dengan loop di admin/products.jsp
+            request.setAttribute("productList", products); 
+            request.getRequestDispatcher("admin/products.jsp").forward(request, response);
+        } else {
+            // Default untuk customer
+            request.setAttribute("products", products);
+            request.getRequestDispatcher("customer/allProduct.jsp").forward(request, response);
+        }
     }
 }
