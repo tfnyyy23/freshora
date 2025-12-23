@@ -4,6 +4,8 @@
     font-family: 'Poppins', sans-serif !important;
 }
 
+body { background: #f9fafb; } 
+
 /* ============================= */
 /*        PROMO SLIDER          */
 /* ============================= */
@@ -21,14 +23,14 @@
   display: none;
 }
 
-.promo-card {
+/*.promo-card {
   min-width: 280px;
   height: 150px;
   border-radius: 16px;
   overflow: hidden;
   flex-shrink: 0;
   box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
+}*/
 
 .promo-card img {
   width: 100%;
@@ -36,6 +38,15 @@
   object-fit: cover;
 }
 
+.promo-slider {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+}
+
+
+            
 /* ============================= */
 /*        DOT INDICATOR         */
 /* ============================= */

@@ -22,7 +22,7 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
         <link rel="stylesheet" href="assets/css/global.css">
-        
+        <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/img/logoFreshora1031.png">
         <style>
             body { background: #f9fafb; }
 
@@ -58,6 +58,28 @@
             .filter-input-group .form-select,
             .filter-input-group .form-control {
                 border-left: none;
+            }
+            
+            #cartToast {
+                background-color: #f0fdf4;
+                border: 1px solid #16a34a !important;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                min-width: 300px;
+            }
+
+            #cartToast .toast-body {
+                color: #166534;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                padding: 12px 16px;
+            }
+
+            #cartToast .bi-check-circle-fill {
+                color: #22c55e;
+                font-size: 1.2rem;
+                margin-right: 12px;
             }
         </style>
     </head>
@@ -171,31 +193,42 @@
             <% } %>
 
         </div>
-            
-        
-        <!-- ================= AJAX CART COUNT ================= -->    
+          
+        <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1060;">
+            <div id="cartToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span id="toastMessage">Produk ditambahkan ke keranjang</span>
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
         <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const buttons = document.querySelectorAll(".add-to-cart");
-                const cartBadge = document.querySelector(".btn.position-relative .badge");
+            function addToCart(productId, productName) {
+                fetch("<%= request.getContextPath() %>/CartServlet?add=" + productId, {
+                    method: "GET",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    // 1. Update Badge Keranjang
+                    document.querySelector(".badge.bg-danger").innerText = data.cartCount;
 
-                buttons.forEach(btn => {
-                    btn.addEventListener("click", function(e) {
-                        e.preventDefault();
-                        const productId = this.getAttribute("data-product-id");
+                    // 2. Update Pesan Toast dengan Nama Produk
+                    document.getElementById('toastMessage').innerText = productName + " ditambahkan ke keranjang";
 
-                        fetch("<%= request.getContextPath() %>/CartServlet?add=" + productId, {
-                            headers: { "X-Requested-With": "XMLHttpRequest" }
-                        })
-
-                        .then(res => res.json())
-                        .then(data => {
-                            cartBadge.textContent = data.cartCount;
-                        })
-                        .catch(err => console.error(err));
-                    });
-                });
-            });
+                    // 3. Tampilkan Toast
+                    const toastEl = document.getElementById('cartToast');
+                    const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+                    toast.show();
+                })
+                .catch(err => console.error(err));
+            }
         </script>
+
     </body>
 </html>

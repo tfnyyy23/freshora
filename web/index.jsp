@@ -19,6 +19,7 @@
         <!-- CSS -->
         <link rel="stylesheet" href="assets/css/index.css">
 
+        <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/img/logoFreshora1031.png">
         <style>
             body {
                 background: linear-gradient(to bottom, #ecfdf5, #ffffff);
@@ -30,13 +31,16 @@
             }
 
             .promo-card {
-                min-width: 100%;
-                max-width: 420px;
-                height: 180px;
+                width: 500px; 
+                height: 130px;
                 color: white;
                 border-radius: 16px;
-                padding: 24px;
+                padding: 20px;
                 flex-shrink: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             }
 
             .whatsapp-box {
@@ -51,10 +55,10 @@
     <body>
 
         <!-- ================= NAVBAR ================= -->
-        <nav class="navbar bg-white shadow-sm px-5 sticky-top">
+        <nav class="navbar bg-white shadow-sm py-3 px-5 sticky-top">
             <div class="d-flex align-items-center gap-2">
                 <img src="assets/img/logoFreshora1031.png" width="36">
-                <span class="fw-bold text-primary-custom fs-4">Freshora</span>
+                <span class="fw-bold text-primary-custom fs-4" style="color: #16a34a;">Freshora</span>
             </div>
             <div class="d-flex gap-2">
                 <a href="login.jsp" class="btn btn-outline-primary-custom">Login</a>
@@ -93,12 +97,23 @@
                     <h4>Paket Hemat Keluarga</h4>
                     <p>Paket lengkap sayur & buah hanya Rp 99.000</p>
                 </div>
+                
+                <div class="promo-card" style="background: linear-gradient(to right, #A855F7, #EC4899);">
+                    <h4>Flash Sale Buah</h4>
+                    <p>Diskon hingga 50% untuk buah-buahan impor pilihan</p>
+                </div>
+
+                <div class="promo-card" style="background: linear-gradient(to right, #EAB308, #F97316);">
+                    <h4>Bonus Poin Member</h4>
+                    <p>Dapatkan double poin untuk setiap transaksi hari ini</p>
+                </div>
 
             </div>
 
             <!-- DOT -->
             <div class="text-center mt-3">
                 <span class="dot active"></span>
+                <span class="dot"></span>
                 <span class="dot"></span>
                 <span class="dot"></span>
             </div>
@@ -170,18 +185,29 @@
         <!-- ================= AUTO SLIDER SCRIPT ================= -->
         <script>
             const promo = document.getElementById('promoScroll');
+            const dots = document.querySelectorAll('.dot');
             let index = 0;
 
             setInterval(() => {
-                index++;
-                if (index >= 5) index = 0;
+                // Ambil semua kartu yang ada di dalam slider
+                const cards = promo.querySelectorAll('.promo-card');
+                const totalCards = cards.length;
 
+                index++;
+                if (index >= totalCards) index = 0;
+
+                // Hitung lebar satu kartu + gap (asumsi gap 16px sesuai CSS promo-scroll Anda)
+                // offsetWidth mengambil lebar asli kartu saat itu
+                const cardWidth = cards[0].offsetWidth + 16; 
+
+                // Geser slider
                 promo.scrollTo({
-                    left: index * 475,
+                    left: index * cardWidth,
                     behavior: 'smooth'
                 });
 
-                document.querySelectorAll('.dot').forEach((d, i) => {
+                // Update indikator titik (dots)
+                dots.forEach((d, i) => {
                     d.classList.toggle('active', i === index);
                 });
             }, 4000);

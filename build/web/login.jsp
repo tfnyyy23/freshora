@@ -19,6 +19,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="assets/css/global.css">
     
+    <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/img/logoFreshora1031.png">
     <style>
         body {
             min-height: 100vh;
@@ -123,9 +124,10 @@
     </div>
 
     <!-- KEMBALI -->
-    <div class="text-center mt-3">
-        <a href="index.jsp" class="text-muted text-decoration-none">
-            ← Kembali ke Beranda
+    <div class="text-center mt-1">
+        <a href="index.jsp" class="text-muted text-decoration-none d-inline-flex align-items-center gap-1">
+            <i class="bi bi-arrow-left-short fs-4"></i>
+            <span>Kembali ke Beranda</span>
         </a>
     </div>
 

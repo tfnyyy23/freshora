@@ -130,26 +130,33 @@ public class ProductServlet extends HttpServlet {
             }
             
             // ================== CART ==================
-            PreparedStatement ps = con.prepareStatement(
-            "SELECT SUM(quantity) AS total FROM cart_items c JOIN carts ca ON c.cart_id=ca.cart_id WHERE ca.user_id=?");
-            ps.setInt(1, userId);
-            ResultSet rse = ps.executeQuery();
-            if (rse.next()) cartCount = rse.getInt("total");
-            session.setAttribute("cartCount", cartCount);
-
-            } catch (SQLException e) {
-                throw new ServletException(e);
-            } finally {
-                db.disconnect();
+            if (!"admin".equals(user.getRole())) {
+                PreparedStatement ps = con.prepareStatement(
+                "SELECT SUM(quantity) AS total FROM cart_items c JOIN carts ca ON c.cart_id=ca.cart_id WHERE ca.user_id=?");
+                ps.setInt(1, userId);
+                ResultSet rse = ps.executeQuery();
+                if (rse.next()) cartCount = rse.getInt("total");
+                session.setAttribute("cartCount", cartCount);
             }
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        } finally {
+            db.disconnect();
+        }
 
-        // ================== SEND TO VIEW ==================
-        request.setAttribute("products", products);
+        // ================== SEND TO VIEW BERDASARKAN ROLE ==================
         request.setAttribute("categories", categories);
         request.setAttribute("selectedCategory", categoryParam);
         request.setAttribute("sortBy", sort);
 
-        request.getRequestDispatcher("customer/allProduct.jsp")
-                .forward(request, response);
+        if (user != null && "admin".equals(user.getRole())) {
+            // Nama attribute disesuaikan dengan loop di admin/products.jsp
+            request.setAttribute("productList", products); 
+            request.getRequestDispatcher("admin/products.jsp").forward(request, response);
+        } else {
+            // Default untuk customer
+            request.setAttribute("products", products);
+            request.getRequestDispatcher("customer/allProduct.jsp").forward(request, response);
+        }
     }
 }

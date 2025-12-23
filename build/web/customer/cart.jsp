@@ -11,10 +11,35 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
         <link rel="stylesheet" href="assets/css/global.css">
+        <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/img/logoFreshora1031.png">
         <style>
             body { background: #f9fafb; }
             .cart-item { background: white; padding: 8px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
             .cart-item img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; }
+            #deleteToast {
+                background-color: #fef2f2;
+                border: 1px solid #ef4444 !important;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+                min-width: 300px;
+            }
+
+            #deleteToast .toast-body {
+                color: #991b1b;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                padding: 12px 16px;
+            }
+
+            #deleteToast .bi-exclamation-circle-fill {
+                color: #ef4444; 
+                font-size: 1.2rem;
+            }
+            
+            .toast-container {
+                z-index: 2000;
+            }
         </style>
     </head>
     <body>
@@ -36,7 +61,7 @@
             <% if (cartItems.isEmpty()) { %>
                 <div class="text-center p-5 bg-white rounded shadow-sm">
                     <p class="text-muted mb-3">Keranjang Anda masih kosong</p>
-                    <a style="background-color: #16a34a; color: white;" href="<%= request.getContextPath() %>/ProductServlet" class="btn w-25">Mulai Belanja</a>
+                    <a style="background-color: #16a34a; color: white; width: 200px;" href="<%= request.getContextPath() %>/ProductServlet" class="btn">Mulai Belanja</a>
                 </div>
             <% } else { %>
 
@@ -74,9 +99,11 @@
                                         <i class="bi bi-plus"></i>
                                     </button>
                                 </form>
-                                <form action="CartServlet" method="post" class="d-inline ms-auto">
+                                <form id="deleteForm-<%= productId %>" action="CartServlet" method="post" class="d-inline ms-auto">
                                     <input type="hidden" name="delete" value="<%= productId %>">
-                                    <button type="submit" class="btn btn-sm"><i style="color: red; font-size: 20px;" class="bi bi-trash"></i></button>
+                                    <button type="button" class="btn btn-sm" onclick="confirmDelete('<%= productId %>', '<%= name %>')">
+                                        <i style="color: #dc3545; font-size: 20px;" class="bi bi-trash"></i>
+                                    </button>
                                 </form>
                             </div>
                             <small class="text-muted">Stok tersedia: <%= stock %></small>
@@ -100,11 +127,48 @@
                         <span>Total Belanja</span>
                         <span>Rp <%= String.format("%,d", totalPrice) %></span>
                     </div>
-                    <a style="background-color: #16a34a; color: white" href="checkout.jsp" class="btn w-100 mt-3">Checkout</a>
+                    <form action="<%= request.getContextPath() %>/OrderServlet" method="post">
+                        <button class="btn w-100 mt-3"
+                                style="background-color:#16a34a;color:white;">
+                            Checkout
+                        </button>
+                    </form>
                 </div>
 
             <% } %>
         </div>
+        
+        <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1060;">
+            <div id="deleteToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-exclamation-circle-fill me-2"></i>
+                        <span id="deleteToastMessage">Produk dihapus dari keranjang</span>
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+        <script>
+            function confirmDelete(productId, productName) {
+                // 1. Update pesan toast
+                document.getElementById('deleteToastMessage').innerText = productName + " dihapus dari keranjang";
+
+                // 2. Tampilkan Toast Merah
+                const toastEl = document.getElementById('deleteToast');
+                const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+                toast.show();
+
+                // 3. Submit form setelah delay agar toast terlihat
+                setTimeout(() => {
+                    document.getElementById('deleteForm-' + productId).submit();
+                }, 1500); 
+            }
+        </script>
 
     </body>
 </html>

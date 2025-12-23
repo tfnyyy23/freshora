@@ -25,25 +25,41 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
         <link rel="stylesheet" href="assets/css/dashboard.css">
-
+        <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/img/logoFreshora1031.png">
         <style>
-            body { background: #f9fafb; }
-
-            .promo-slider {
-                display: flex;
-                gap: 15px;
-                overflow-x: auto;
-                scroll-snap-type: x mandatory;
-            }
-
             .promo-card {
-                min-width: 30%;
-                max-width: 420px;
-                height: 150px;
+                width: 500px; 
+                height: 130px;
                 color: white;
                 border-radius: 16px;
-                padding: 24px;
+                padding: 20px;
                 flex-shrink: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+            
+            #cartToast {
+                background-color: #f0fdf4; 
+                border: 1px solid #16a34a !important; 
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+                min-width: 300px;
+            }
+
+            #cartToast .toast-body {
+                color: #166534; 
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                padding: 12px 16px;
+            }
+
+            #cartToast .bi-check-circle-fill {
+                color: #22c55e; 
+                font-size: 1.2rem;
+                margin-right: 12px;
             }
         </style>
     </head>
@@ -56,7 +72,7 @@
 
                 <div class="d-flex align-items-center gap-2">
                     <img src="assets/img/logoFreshora1031.png" width="36" alt="Freshora Logo">
-                    <span class="fw-bold text-primary-custom fs-4">Freshora</span>
+                    <span class="fw-bold text-primary-custom fs-4" style="color: #16a34a;">Freshora</span>
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
@@ -67,7 +83,7 @@
                         </span>
                     </a> 
 
-                    <a href="profile.jsp" class="btn">
+                    <a href="<%= request.getContextPath() %>/ProfileServlet" class="btn">
                         <i class="bi bi-person fs-3"></i>
                     </a>
                 </div>
@@ -105,12 +121,23 @@
                         <h4>Paket Hemat Keluarga</h4>
                         <p>Paket lengkap sayur & buah hanya Rp 99.000</p>
                     </div>
+                    
+                    <div class="promo-card" style="background: linear-gradient(to right, #A855F7, #EC4899);">
+                        <h4>Flash Sale Buah</h4>
+                        <p>Diskon hingga 50% untuk buah-buahan impor pilihan</p>
+                    </div>
+
+                    <div class="promo-card" style="background: linear-gradient(to right, #EAB308, #F97316);">
+                        <h4>Bonus Poin Member</h4>
+                        <p>Dapatkan double poin untuk setiap transaksi hari ini</p>
+                    </div>
 
                 </div>
 
                 <!-- DOT -->
                 <div class="text-center mt-3">
                     <span class="dot active"></span>
+                    <span class="dot"></span>
                     <span class="dot"></span>
                     <span class="dot"></span>
                 </div>
@@ -161,53 +188,75 @@
                     }
                 %>
             </div>
+        </div>
+            
+        <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1060;">
+            <div id="cartToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span id="toastMessage">Produk ditambahkan ke keranjang</span>
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            function addToCart(productId, productName) {
+                fetch("<%= request.getContextPath() %>/CartServlet?add=" + productId, {
+                    method: "GET",
+                    headers: { "X-Requested-With": "XMLHttpRequest" }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    // 1. Update Badge Keranjang
+                    document.querySelector(".badge.bg-danger").innerText = data.cartCount;
+
+                    // 2. Update Pesan Toast dengan Nama Produk
+                    document.getElementById('toastMessage').innerText = productName + " ditambahkan ke keranjang";
+
+                    // 3. Tampilkan Toast
+                    const toastEl = document.getElementById('cartToast');
+                    const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+                    toast.show();
+                })
+                .catch(err => console.error(err));
+            }
+        </script>
 
  
         <!-- ================= AUTO SLIDER SCRIPT ================= -->
         <script>
             const promo = document.getElementById('promoScroll');
+            const dots = document.querySelectorAll('.dot');
             let index = 0;
 
             setInterval(() => {
-                index++;
-                if (index >= 5) index = 0;
+                // Ambil semua kartu yang ada di dalam slider
+                const cards = promo.querySelectorAll('.promo-card');
+                const totalCards = cards.length;
 
+                index++;
+                if (index >= totalCards) index = 0;
+
+                // Hitung lebar satu kartu + gap (asumsi gap 16px sesuai CSS promo-scroll Anda)
+                // offsetWidth mengambil lebar asli kartu saat itu
+                const cardWidth = cards[0].offsetWidth + 16; 
+
+                // Geser slider
                 promo.scrollTo({
-                    left: index * 475,
+                    left: index * cardWidth,
                     behavior: 'smooth'
                 });
 
-                document.querySelectorAll('.dot').forEach((d, i) => {
+                // Update indikator titik (dots)
+                dots.forEach((d, i) => {
                     d.classList.toggle('active', i === index);
                 });
             }, 4000);
         </script>
-        
-        <!-- ================= AJAX CART COUNT ================= -->    
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                const buttons = document.querySelectorAll(".add-to-cart");
-                const cartBadge = document.querySelector(".btn.position-relative .badge");
-
-                buttons.forEach(btn => {
-                    btn.addEventListener("click", function(e) {
-                        e.preventDefault();
-                        const productId = this.getAttribute("data-product-id");
-
-                        fetch("<%= request.getContextPath() %>/CartServlet?add=" + productId, {
-                            headers: { "X-Requested-With": "XMLHttpRequest" }
-                        })
-
-                        .then(res => res.json())
-                        .then(data => {
-                            cartBadge.textContent = data.cartCount;
-                        })
-                        .catch(err => console.error(err));
-                    });
-                });
-            });
-        </script>
-
     </body>
 </html>
 
