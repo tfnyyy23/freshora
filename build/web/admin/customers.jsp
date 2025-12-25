@@ -57,21 +57,31 @@
     </style>
 </head>
 <body>
-    <div class="sidebar p-3">
+     <div class="sidebar p-3">
         <div class="d-flex align-items-center mb-4 px-3">
-            <img src="../assets/img/logoFreshora1031.png" width="32" alt="Freshora Logo" class="me-2">
+            <img src="${pageContext.request.contextPath}/assets/img/logoFreshora1031.png" width="32" alt="Freshora Logo" class="me-2">
             <h4 class="fw-bold mb-0" style="color: #16a34a; font-family: 'Inter', sans-serif;">Freshora</h4>
         </div>
         
         <nav class="nav flex-column">
-            <a class="nav-link" href="dashboard.jsp"><i class="bi bi-grid me-2"></i> Dashboard</a>
-            <a class="nav-link" href="products.jsp">
-                <i class="bi bi-box-seam me-2"></i> Produk</a>
-            <a class="nav-link" href="orders.jsp"><i class="bi bi-cart me-2"></i> Pesanan</a>
-            <a class="nav-link active" href="customers.jsp"><i class="bi bi-people me-2"></i> Customer</a>
-            <a class="nav-link" href="reports.jsp"><i class="bi bi-bar-chart-line me-2"></i> Laporan</a>
-            <hr>
-            <a class="nav-link text-danger" href="../logout"><i class="bi bi-box-arrow-left me-2"></i> Logout</a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/admin/dashboard.jsp">
+                <i class="bi bi-grid me-2"></i> Dashboard
+            </a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/ProductServlet">
+                <i class="bi bi-box-seam me-2"></i> Produk
+            </a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/OrderServlet">
+                <i class="bi bi-cart me-2"></i> Pesanan
+            </a>
+            <a class="nav-link active" href="${pageContext.request.contextPath}/ManageCustomerServlet">
+                <i class="bi bi-people me-2"></i> Customer
+            </a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/ReportServlet">
+                <i class="bi bi-bar-chart-line me-2"></i> Laporan
+            </a>
+            <a href="${pageContext.request.contextPath}/logout" class="nav-link text-danger">
+                <i class="bi bi-box-arrow-left me-2"></i> Logout
+            </a>
         </nav>
     </div>
 

@@ -4,7 +4,6 @@
  */
 package servlets;
 
-// TAMBAHKAN IMPORT BERIKUT AGAR TIDAK ERROR
 import classes.JDBC; 
 import java.sql.ResultSet;
 import java.io.IOException;
@@ -14,7 +13,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "ReportServlet", urlPatterns = {"/admin/ReportServlet"})
+// PERBAIKAN: Hapus "/admin" dari urlPatterns agar link sidebar sinkron
+@WebServlet(name = "ReportServlet", urlPatterns = {"/ReportServlet"})
 public class ReportServlet extends HttpServlet {
 
     @Override
@@ -27,7 +27,7 @@ public class ReportServlet extends HttpServlet {
 
         try {
             db.connect();
-            // Hitung total pendapatan hari ini
+            // Hitung total pendapatan
             ResultSet rs1 = db.getConnection().createStatement().executeQuery(
                 "SELECT SUM(total_price) FROM orders WHERE status='Selesai'");
             if(rs1.next()) totalRevenue = rs1.getInt(1);
@@ -46,7 +46,7 @@ public class ReportServlet extends HttpServlet {
         request.setAttribute("revenue", totalRevenue);
         request.setAttribute("transactions", totalTransactions);
         
-        // Pastikan path forward sesuai dengan folder file jsp kamu
-        request.getRequestDispatcher("/admin/reports.jsp").forward(request, response);
+        // PERBAIKAN: Pastikan forward mengarah ke file di dalam folder admin
+        request.getRequestDispatcher("admin/reports.jsp").forward(request, response);
     }
 }
