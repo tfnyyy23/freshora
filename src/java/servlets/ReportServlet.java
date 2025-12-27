@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "ReportServlet", urlPatterns = {"/admin/ReportServlet"})
+@WebServlet(name = "ReportServlet", urlPatterns = {"/ReportServlet"})
 public class ReportServlet extends HttpServlet {
 
     @Override

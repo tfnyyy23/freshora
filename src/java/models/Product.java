@@ -30,10 +30,15 @@ public class Product {
 
     public int getProductId() { return productId; }
     public String getName() { return name; }
+    public String getDescription() { return description; }
     public int getPrice() { return price; }
     public String getImage() { return image; }
-     public int getStock() { return stock; }
-     public double getRating() { return rating; }
-     public int getCategoryId() { return categoryId; }
-     
+    public int getStock() { return stock; }
+    public double getRating() { return rating; }
+    public int getCategoryId() { return categoryId; }
+    
+    public void setDescription(String description) { this.description = description; }
+    public void setName(String name) { this.name = name; }
+    public void setPrice(int price) { this.price = price; }
+    public void setStock(int stock) { this.stock = stock; }
 }

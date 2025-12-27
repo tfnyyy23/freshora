@@ -8,6 +8,10 @@
 <%@ page import="java.util.*, models.Product, models.User" %>
 
 <%
+    if (session.getAttribute("user") == null) {
+        response.sendRedirect("../login.jsp");
+    }
+    
     User user = (User) session.getAttribute("user");
     if (user == null) {
         response.sendRedirect(request.getContextPath() + "/login.jsp");

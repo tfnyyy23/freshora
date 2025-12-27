@@ -14,8 +14,10 @@
     <title>Pesanan - Freshora Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/global.css">
+    <link rel="icon" type="image/png" href="assets/img/logoFreshora1031.png">
     <style>
-        body { background-color: #f8f9fa; font-family: 'Inter', sans-serif; }
+        body { background-color: #f8f9fa;}
         .sidebar { width: 240px; height: 100vh; position: fixed; background: white; border-right: 1px solid #eee; }
         .main-content { margin-left: 240px; padding: 30px; }
         .nav-link { color: #666; padding: 12px 20px; border-radius: 8px; margin-bottom: 5px; }
@@ -26,19 +28,29 @@
 
     <div class="sidebar p-3">
         <div class="d-flex align-items-center mb-4 px-3">
-            <img src="../assets/img/logoFreshora1031.png" width="32" alt="Freshora Logo" class="me-2">
-            <h4 class="fw-bold mb-0" style="color: #16a34a; font-family: 'Inter', sans-serif;">Freshora</h4>
+            <img src="assets/img/logoFreshora1031.png" width="32" alt="Freshora Logo" class="me-2">
+            <span class="fw-bold text-primary-custom fs-4" style="color: #16a34a;">Freshora</span>
         </div>
         
         <nav class="nav flex-column">
-            <a class="nav-link" href="dashboard.jsp"><i class="bi bi-grid me-2"></i> Dashboard</a>
-            <a class="nav-link" href="products.jsp">
-                <i class="bi bi-box-seam me-2"></i> Produk</a>
-            <a class="nav-link active" href="orders.jsp"><i class="bi bi-cart me-2"></i> Pesanan</a>
-            <a class="nav-link" href="customers.jsp"><i class="bi bi-people me-2"></i> Customer</a>
-            <a class="nav-link" href="reports.jsp"><i class="bi bi-bar-chart-line me-2"></i> Laporan</a>
-            <hr>
-            <a class="nav-link text-danger" href="../logout"><i class="bi bi-box-arrow-left me-2"></i> Logout</a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/AdminServlet">
+                <i class="bi bi-grid me-2"></i> Dashboard
+            </a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/ProductServlet">
+                <i class="bi bi-box-seam me-2"></i> Produk
+            </a>
+            <a class="nav-link active" href="${pageContext.request.contextPath}/OrderServlet">
+                <i class="bi bi-cart me-2"></i> Pesanan
+            </a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/ManageUserServlet">
+                <i class="bi bi-people me-2"></i> Pengguna
+            </a>
+            <a class="nav-link" href="${pageContext.request.contextPath}/ReportServlet">
+                <i class="bi bi-bar-chart-line me-2"></i> Laporan
+            </a>
+            <a href="${pageContext.request.contextPath}/logout" class="nav-link text-danger">
+                <i class="bi bi-box-arrow-left me-2"></i> Logout
+            </a>
         </nav>
     </div>
 

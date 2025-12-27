@@ -4,145 +4,18 @@
  */
 package servlets;
 
-import models.User;
 import classes.JDBC;
-import javax.servlet.http.*;
+import models.User;
+import java.io.IOException;
 import java.sql.*;
 import java.util.*;
-import java.io.IOException;
-import java.io.PrintWriter;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 
-/**
- *
- * @author ASUS
- */
 @WebServlet(name = "OrderServlet", urlPatterns = {"/OrderServlet"})
 public class OrderServlet extends HttpServlet {
 
-    /**
-     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
-     * methods.
-     *
-     * @param request servlet request
-     * @param response servlet response
-     * @throws ServletException if a servlet-specific error occurs
-     * @throws IOException if an I/O error occurs
-     */
-    @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
-        HttpSession session = request.getSession();
-        User user = (User) session.getAttribute("user");
-
-        if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/login.jsp");
-            return;
-        }
-
-        int userId = user.getUserId();
-
-        JDBC db = new JDBC();
-        db.connect();
-
-        try {
-            Connection con = db.getConnection();
-            con.setAutoCommit(false);
-
-            // Ambil cart user
-            int cartId = 0;
-            PreparedStatement psCart = con.prepareStatement(
-                    "SELECT cart_id FROM carts WHERE user_id=?");
-            psCart.setInt(1, userId);
-            ResultSet rsCart = psCart.executeQuery();
-            if (rsCart.next()) {
-                cartId = rsCart.getInt("cart_id");
-            } else {
-                response.sendRedirect(request.getContextPath() + "/CartServlet");
-                return;
-            }
-
-            // Ambil item cart
-            PreparedStatement psItems = con.prepareStatement(
-                    "SELECT ci.product_id, ci.quantity, p.price " +
-                    "FROM cart_items ci JOIN products p ON ci.product_id = p.product_id " +
-                    "WHERE ci.cart_id=?");
-            psItems.setInt(1, cartId);
-            ResultSet rsItems = psItems.executeQuery();
-
-            List<Map<String, Object>> items = new ArrayList<>();
-            int total = 0;
-
-            while (rsItems.next()) {
-                int productId = rsItems.getInt("product_id");
-                int qty = rsItems.getInt("quantity");
-                int price = rsItems.getInt("price");
-
-                total += qty * price;
-
-                Map<String, Object> item = new HashMap<>();
-                item.put("productId", productId);
-                item.put("quantity", qty);
-                item.put("price", price);
-                items.add(item);
-            }
-
-            if (items.isEmpty()) {
-                response.sendRedirect(request.getContextPath() + "/CartServlet");
-                return;
-            }
-
-            // Insert orders
-            PreparedStatement psOrder = con.prepareStatement(
-                    "INSERT INTO orders (user_id, total, status) VALUES (?, ?, 'pending')",
-                    Statement.RETURN_GENERATED_KEYS);
-            psOrder.setInt(1, userId);
-            psOrder.setInt(2, total);
-            psOrder.executeUpdate();
-
-            ResultSet rsOrder = psOrder.getGeneratedKeys();
-            rsOrder.next();
-            int orderId = rsOrder.getInt(1);
-
-            // Insert order_items
-            PreparedStatement psItem = con.prepareStatement(
-                    "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?,?,?,?)");
-
-            for (Map<String, Object> item : items) {
-                psItem.setInt(1, orderId);
-                psItem.setInt(2, (int) item.get("productId"));
-                psItem.setInt(3, (int) item.get("quantity"));
-                psItem.setInt(4, (int) item.get("price"));
-                psItem.addBatch();
-            }
-            psItem.executeBatch();
-
-            // Kosongkan Cart
-            PreparedStatement psClear = con.prepareStatement(
-                    "DELETE FROM cart_items WHERE cart_id=?");
-            psClear.setInt(1, cartId);
-            psClear.executeUpdate();
-
-            con.commit();
-
-            // Simpan order ke session
-            session.setAttribute("order_id", orderId);
-            session.setAttribute("order_total", total);
-
-            response.sendRedirect(request.getContextPath() + "/PaymentServlet");
-
-        } catch (SQLException e) {
-            throw new ServletException(e);
-        } finally {
-            db.disconnect();
-        }
-    }
-    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -194,7 +67,7 @@ public class OrderServlet extends HttpServlet {
             request.getRequestDispatcher("admin/orders.jsp").forward(request, response);
         } else {
             // Halaman riwayat pesanan untuk customer (opsional)
-            request.getRequestDispatcher("customer/myOrders.jsp").forward(request, response);
+            request.getRequestDispatcher("ProfileServlet").forward(request, response);
         }
     }
 }
