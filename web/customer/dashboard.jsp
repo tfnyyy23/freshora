@@ -8,6 +8,10 @@
 <%@ page import="java.util.*, models.Product, models.User" %>
 
 <%
+    if (session.getAttribute("user") == null) {
+        response.sendRedirect("../login.jsp");
+    }
+    
     User user = (User) session.getAttribute("user");
     if (user == null) {
         response.sendRedirect(request.getContextPath() + "/login.jsp");
@@ -26,42 +30,6 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
         <link rel="stylesheet" href="assets/css/dashboard.css">
         <link rel="icon" type="image/png" href="${pageContext.request.contextPath}/assets/img/logoFreshora1031.png">
-        <style>
-            .promo-card {
-                width: 500px; 
-                height: 130px;
-                color: white;
-                border-radius: 16px;
-                padding: 20px;
-                flex-shrink: 0;
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            }
-            
-            #cartToast {
-                background-color: #f0fdf4; 
-                border: 1px solid #16a34a !important; 
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-                min-width: 300px;
-            }
-
-            #cartToast .toast-body {
-                color: #166534; 
-                font-weight: 500;
-                display: flex;
-                align-items: center;
-                padding: 12px 16px;
-            }
-
-            #cartToast .bi-check-circle-fill {
-                color: #22c55e; 
-                font-size: 1.2rem;
-                margin-right: 12px;
-            }
-        </style>
     </head>
 
     <body>
@@ -81,7 +49,7 @@
                         <span style="position: absolute; top: 5px; transform: none" class="badge rounded-pill bg-danger pt-1">
                             ${sessionScope.cartCount == null ? 0 : sessionScope.cartCount}
                         </span>
-                    </a> 
+                    </a>
 
                     <a href="<%= request.getContextPath() %>/ProfileServlet" class="btn">
                         <i class="bi bi-person fs-3"></i>
@@ -94,12 +62,24 @@
 
             <!-- ================= USER INFO ================= -->
             <div style="border-radius: 10px;" class="bg-white shadow-sm p-3 mb-2 d-flex align-items-center gap-3">
-                <div class="avatar-circle">
-                    <i class="bi bi-person"></i>
+                <div class="avatar-placeholder">
+                    <% 
+                        String name = user.getName();
+                        String initials = "";
+                        if (name != null && !name.isEmpty()) {
+                            String[] words = name.split("\\s+"); // Memecah berdasarkan spasi
+                            for (int i = 0; i < Math.min(words.length, 2); i++) { // Ambil maksimal 2 kata
+                                if (!words[i].isEmpty()) {
+                                    initials += words[i].charAt(0);
+                                }
+                            }
+                        }
+                    %>
+                    <%= initials.toUpperCase() %>
                 </div>
                 <div>
                     <h6 class="mb-0">Halo, <%= user.getUsername() %> 👋</h6>
-                    <small class="text-muted">📍 <%= user.getAddress() %></small>
+                    <small class="text-muted">📍 <%= (user.getAddress() == null || user.getAddress().trim().isEmpty() || user.getAddress().equals("null")) ? "Alamat belum diisi" : user.getAddress() %></small>
                 </div>
             </div>
 
@@ -190,7 +170,7 @@
             </div>
         </div>
             
-        <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 1060;">
+        <div class="toast-container position-fixed top-0 start-50 translate-middle-x p-3" style="margin-top: 80px">
             <div id="cartToast" class="toast align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="d-flex">
                     <div class="toast-body">

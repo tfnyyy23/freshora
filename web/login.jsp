@@ -85,13 +85,23 @@
     <%
         String error = request.getParameter("error");
         if (error != null) {
+            String errorMessage = "";
+
+            if (error.equals("not_found")) {
+                errorMessage = "Username tidak terdaftar!";
+            } else if (error.equals("wrong_pass")) {
+                errorMessage = "Password yang Anda masukkan salah!";
+            } else if (error.equals("server")) {
+                errorMessage = "Terjadi gangguan pada server.";
+            } else if (error.equals("role")) {
+                errorMessage = "Role pengguna tidak dikenali.";
+            } else {
+                errorMessage = "Terjadi kesalahan, silakan coba lagi.";
+            }
     %>
         <div class="error-box d-flex align-items-center gap-2">
             <i class="bi bi-exclamation-circle"></i>
-            <span>
-                <%= error.equals("1") ? "Username atau password salah" : "Terjadi kesalahan pada server" %>
-            </span>
-        </div>
+            <span><%= errorMessage %></span> </div>
     <%
         }
     %>

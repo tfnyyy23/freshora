@@ -5,7 +5,14 @@
 --%>
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="java.util.*, java.text.NumberFormat" %>
+<%@ page import="java.util.*, java.text.NumberFormat, models.User" %>
+<%
+    User userData = (User) session.getAttribute("user");
+    if (session.getAttribute("user") == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -19,12 +26,6 @@
     <style>
         body { background-color: #f9fafb;}
         .card { border: none; border-radius: 15px; }
-        .profile-circle {
-            width: 70px; height: 70px;
-            background-color: #e8fcf1; color: #28a745;
-            display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; margin-bottom: 20px;
-        }
         .form-control-plaintext {
             background-color: #f1f3f5; padding: 10px 15px;
             border-radius: 8px; border: 1px solid #e9ecef;
@@ -49,7 +50,6 @@
         transition: color 0.2s; 
     }
     
-    /* Warna saat di-hover atau dipilih */
     .star-rating input:checked ~ label,
     .star-rating label:hover,
     .star-rating label:hover ~ label { 
@@ -64,8 +64,21 @@
         padding: 10px; 
         border: none;
     }
-        .modal-header { border-bottom: none; padding-top: 25px; }
-        .modal-footer { border-top: none; padding-bottom: 25px; }
+    .modal-header { border-bottom: none; padding-top: 25px; }
+    .modal-footer { border-top: none; padding-bottom: 25px; }
+    .avatar-placeholder {
+        width: 70px;
+        height: 70px;
+        background-color: #DBFCE7;
+        color: #16a34a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: 600;
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
     </style>
 </head>
 <body>
@@ -85,34 +98,48 @@
         <div class="card shadow-sm mb-4 p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold mb-0">Informasi Profil</h5>
-                <a href="#" class="text-decoration-none fw-medium" style="color: #16a34a;">Edit</a>
+                <a href="<%= request.getContextPath() %>/ProfileServlet?action=edit" class="text-decoration-none fw-medium" style="color: #16a34a;">Edit</a>
             </div>
-            <div class="profile-circle"><i class="bi bi-person fs-1"></i></div>
+            <div class="avatar-placeholder">
+                    <% 
+                        String name = userData.getName();
+                        String initials = "";
+                        if (name != null && !name.isEmpty()) {
+                            String[] words = name.split("\\s+"); // Memecah berdasarkan spasi
+                            for (int i = 0; i < Math.min(words.length, 2); i++) { // Ambil maksimal 2 kata
+                                if (!words[i].isEmpty()) {
+                                    initials += words[i].charAt(0);
+                                }
+                            }
+                        }
+                    %>
+                    <%= initials.toUpperCase() %>
+            </div>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="small text-muted mb-1">Nama Lengkap</label>
-                    <div class="form-control-plaintext">${user.name}</div>
+                    <div class="form-control-plaintext">${userData.name}</div>
                 </div>
                 <div class="col-md-6">
                     <label class="small text-muted mb-1">Username</label>
-                    <div class="form-control-plaintext">${user.username != null ? user.username : 'jenoyaa'}</div>
+                    <div class="form-control-plaintext">${userData.username != null ? userData.username : '-'}</div>
                 </div>
                 <div class="col-md-6">
                     <label class="small text-muted mb-1">Email</label>
-                    <div class="form-control-plaintext">${user.email}</div>
+                    <div class="form-control-plaintext">${userData.email}</div>
                 </div>
                 <div class="col-md-6">
                     <label class="small text-muted mb-1">Nomor Telepon</label>
-                    <div class="form-control-plaintext">${user.phone != null ? user.phone : '081234567890'}</div>
+                    <div class="form-control-plaintext">${userData.phone != null ? userData.phone : 'Belum ditambahkan'}</div>
                 </div>
                 <div class="col-12">
                     <label class="small text-muted mb-1">Alamat</label>
-                    <div class="form-control-plaintext" style="min-height: 80px;">${user.address != null ? user.address : 'Seoul, South Korea'}</div>
+                    <div class="form-control-plaintext" style="min-height: 80px;">${userData.address != null ? userData.address : 'Alamat belum diisi'}</div>
                 </div>
             </div>
         </div>
 
-        <form action="LogoutServlet" method="post" class="mb-5">
+        <form action="${pageContext.request.contextPath}/logout" method="get" class="mb-5">
             <button type="submit" class="btn btn-logout w-100 fw-normal">
                 <i class="bi bi-box-arrow-right me-2"></i> Logout
             </button>

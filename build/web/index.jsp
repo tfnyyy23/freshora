@@ -49,6 +49,7 @@
                 border-radius: 16px;
                 padding: 32px;
             }
+            .card-custom:hover { transform: translateY(-10px); }
         </style>
     </head>
 

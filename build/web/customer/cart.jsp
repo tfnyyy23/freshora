@@ -128,6 +128,7 @@
                         <span>Rp <%= String.format("%,d", totalPrice) %></span>
                     </div>
                     <form action="<%= request.getContextPath() %>/OrderServlet" method="post">
+                        <input type="hidden" name="action" value="checkout">
                         <button class="btn w-100 mt-3"
                                 style="background-color:#16a34a;color:white;">
                             Checkout
